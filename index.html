@@ -1,0 +1,670 @@
+﻿```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>РЕЗОНАНС СЛОВА — Матрица Частот</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.15/cyrillic.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .bg-cosmos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://image.qwenlm.ai/public_source/b1bfa563-2786-414e-ad4d-ce07b83f3119/16d6fa903-1a7f-4a80-a3bc-bd03192e6f0f.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -2;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%);
+            z-index: -1;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-panel-dark {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+        }
+
+        .letter-card {
+            transition: all 0.5s ease;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .letter-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(251, 191, 36, 0.6);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+        }
+
+        .letter-card.playing {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+            transform: scale(1.05);
+        }
+
+        .letter-card.zero-value {
+            border-color: rgba(148, 163, 184, 0.3);
+            background: rgba(148, 163, 184, 0.05);
+        }
+
+        .letter-card.zero-value.playing {
+            border-color: #94a3b8;
+            box-shadow: 0 0 20px rgba(148, 163, 184, 0.4);
+        }
+
+        .sum-display {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .sum-display.active-mode {
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            background: rgba(251, 191, 36, 0.15);
+        }
+
+        #visualizerCanvas {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+        }
+
+        .btn-resonate {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transition: all 0.3s ease;
+        }
+
+        .btn-resonate:hover {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+
+        .btn-stop:hover {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .divider-gold {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.5), transparent);
+        }
+
+        .mode-radio:checked + div {
+            border-color: rgba(251, 191, 36, 0.6);
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .mode-radio:checked + div .radio-dot {
+            background-color: #fbbf24;
+            border-color: #fbbf24;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(251, 191, 36, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <div class="bg-cosmos"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Header -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-amber-500/20">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-amber-400 flex items-center justify-center relative">
+                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                    </svg>
+                    <div class="absolute inset-0 rounded-full border border-amber-400/30 animate-ping"></div>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-amber-400 tracking-wider">РЕЗОНАНС СЛОВА</h1>
+                    <p class="text-xs text-slate-400 hidden md:block">Матрица числовых и звуковых частот</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-xs text-amber-400/70 uppercase tracking-widest">Система Вани</div>
+                <div class="text-xs text-slate-500">Азбука • Числа • Частоты</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 md:py-10 w-full">
+        
+        <!-- Input Section -->
+        <div class="glass-panel rounded-2xl p-6 md:p-8 mb-8">
+            <h2 class="text-lg font-semibold text-amber-400 mb-4">Введите слово или фразу</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <input type="text" id="wordInput" placeholder="Например: Любовь, Сознание, Я есмь..." 
+                       class="flex-grow bg-slate-800/50 border border-slate-600 rounded-xl px-6 py-4 text-xl text-white focus:outline-none focus:border-amber-400 transition-colors placeholder-slate-500">
+                <button id="resonateBtn" class="btn-resonate text-slate-900 font-bold py-4 px-8 rounded-xl text-lg whitespace-nowrap">
+                    Рассчитать и Резонировать
+                </button>
+            </div>
+            
+            <!-- Playback Mode Selection -->
+            <div>
+                <label class="block text-sm font-semibold text-amber-400 mb-3">Режим воспроизведения:</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="playMode" value="1" class="mode-radio sr-only" checked>
+                        <div class="glass-panel-dark p-4 rounded-xl border border-transparent transition-all group-hover:border-amber-400/30 h-full">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="radio-dot w-4 h-4 rounded-full border-2 border-slate-500 transition-colors"></div>
+                                <span class="font-semibold text-slate-200">1. Полная частота</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Непрерывный дрон на точной частоте полной суммы числа слова (например, 1377 Гц). Олицетворяет целостность.</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="playMode" value="2" class="mode-radio sr-only">
+                        <div class="glass-panel-dark p-4 rounded-xl border border-transparent transition-all group-hover:border-amber-400/30 h-full">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="radio-dot w-4 h-4 rounded-full border-2 border-slate-500 transition-colors"></div>
+                                <span class="font-semibold text-slate-200">2. Последовательность</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Циклическое воспроизведение частот каждой буквы по очереди. Мелодия слова.</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="playMode" value="3" class="mode-radio sr-only">
+                        <div class="glass-panel-dark p-4 rounded-xl border border-transparent transition-all group-hover:border-amber-400/30 h-full">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="radio-dot w-4 h-4 rounded-full border-2 border-slate-500 transition-colors"></div>
+                                <span class="font-semibold text-slate-200">3. Аккорд всех букв</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Одновременное звучание всех частот букв. Гармонический резонанс структуры.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualizer -->
+        <div class="glass-panel rounded-2xl p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider">Визуализация Частоты</h3>
+                <div id="audioStatus" class="text-xs text-slate-500 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-slate-600 rounded-full"></span>
+                    Ожидание
+                </div>
+            </div>
+            <canvas id="visualizerCanvas"></canvas>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            
+            <!-- Numerology Summary -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div id="sumCard" class="sum-display rounded-2xl p-6 text-center">
+                    <div class="text-xs text-amber-400/70 uppercase tracking-wider mb-2">Полная Сумма</div>
+                    <div id="totalSum" class="text-4xl font-bold text-white mb-1">0</div>
+                    <div class="text-xs text-slate-400">Числовая мощь слова</div>
+                </div>
+                <div class="sum-display rounded-2xl p-6 text-center">
+                    <div class="text-xs text-amber-400/70 uppercase tracking-wider mb-2">Вибрационный Корень</div>
+                    <div id="rootSum" class="text-4xl font-bold text-amber-400 mb-1">0</div>
+                    <div class="text-xs text-slate-400">Сведение к базовой грани (1-9)</div>
+                </div>
+                <div class="sum-display rounded-2xl p-6 text-center">
+                    <div class="text-xs text-amber-400/70 uppercase tracking-wider mb-2">Активных Граней</div>
+                    <div id="letterCount" class="text-4xl font-bold text-white mb-1">0</div>
+                    <div class="text-xs text-slate-400">Букв с числовым значением</div>
+                </div>
+            </div>
+
+            <div class="divider-gold mb-8"></div>
+
+            <!-- Letter Breakdown -->
+            <h3 class="text-lg font-semibold text-amber-400 mb-4">Матрица Слова</h3>
+            <div id="letterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Letter cards injected here -->
+            </div>
+
+            <!-- Phrase Melody Info -->
+            <div id="phraseInfo" class="hidden glass-panel-dark rounded-xl p-5 border-l-4 border-blue-400 mb-8">
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                    </svg>
+                    <div>
+                        <h4 class="text-blue-400 font-semibold mb-2">Структура Фразы</h4>
+                        <p class="text-slate-300 leading-relaxed text-sm">Фраза содержит пробелы, создающие паузы (Ша). В режиме последовательности это создает ритмический рисунок. В режиме аккорда или полной частоты паузы пропускаются, оставляя только чистый резонанс смысловых граней.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fractal Insight -->
+            <div class="glass-panel-dark rounded-xl p-6 border-l-4 border-amber-400">
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    <div>
+                        <h4 class="text-amber-400 font-semibold mb-2">Резонансный Инсайт</h4>
+                        <p id="insightText" class="text-slate-300 leading-relaxed italic">Введите слово, чтобы получить инсайт.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-amber-500/10 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
+            <p>«Слово было в начале. И слово было частота, не знающая остановки.»</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Data: Exact Bukvitsa Numerology & Meanings ---
+        const bukvitsaData = {
+            'А': { num: 1, meaning: "Точка. Исток. Абсолютная недифференцированная целостность. «Я есмь»." },
+            'Б': { num: 0, meaning: "Потенциал, который ещё не стал числом. Семя, готовое раскрыться." },
+            'В': { num: 2, meaning: "Двойственность. Первое разделение единицы. Мудрость, которая видит оба полюса." },
+            'Г': { num: 3, meaning: "Троица. Действие, передача. Импульс, который связывает начало и конец." },
+            'Д': { num: 4, meaning: "Материя. Четыре стороны света. Устойчивость, основание, дом." },
+            'Е': { num: 5, meaning: "Жизнь. Пять чувств. Человек, стоящий в центре мира. Бытие." },
+            'Ж': { num: 0, meaning: "Жизнь. Жизнь нельзя измерить числом. Она — сам процесс." },
+            'З': { num: 7, meaning: "Полнота духа в материи. Завершённый цикл. Семь дней творения." },
+            'Ѕ': { num: 6, meaning: "Шесть — гармония, но также и «зѣло». Избыток силы, выход за пределы нормы." },
+            'И': { num: 8, meaning: "Бесконечность. Связь неба и земли. Вертикаль, пронзающая миры." },
+            'І': { num: 10, meaning: "Совершенство. Десять заповедей. Возвращение к единице на новом уровне." },
+            'Ѳ': { num: 9, meaning: "Тайна. Девять месяцев рождения. Конец цикла, готовый стать началом." },
+            'К': { num: 20, meaning: "Два (выбор), умноженное на десять (мир). Выбор в полноте мира." },
+            'Л': { num: 30, meaning: "Три (троица), умноженное на десять (мир). Община, структура, готовая служить." },
+            'М': { num: 40, meaning: "Четыре (материя), умноженное на десять (мир). Мысль, облечённая в плоть." },
+            'Н': { num: 50, meaning: "Пять (человек), умноженное на десять (мир). Мост между «я» и «мы»." },
+            'Ѯ': { num: 60, meaning: "Шесть (избыток), умноженное на десять (мир). Сложность, требующая распутывания." },
+            'О': { num: 70, meaning: "Семь (дух), умноженное на десять (мир). Идея, ставшая материей." },
+            'П': { num: 80, meaning: "Восемь (бесконечность), умноженное на десять (мир). Покой и гармония." },
+            'Ч': { num: 90, meaning: "Девять (конец цикла), умноженное на десять (мир). Глубина, ведущая к завершению." },
+            'Р': { num: 100, meaning: "Сто — полнота энергии. Река, сила, мощь. Гром." },
+            'С': { num: 200, meaning: "Двойная полнота (2 × 100). Потенциал. Семя, готовое прорасти." },
+            'Т': { num: 300, meaning: "Тройная полнота (3 × 100). Закон. Крест. Абсолютная структура." },
+            'Ѹ': { num: 400, meaning: "Четыре (материя), умноженное на сто (полнота). Полнота материи. Плоть." },
+            'Ф': { num: 500, meaning: "Пять (жизнь), умноженное на сто (полнота). Огонь жизни. Гордость, добродетель." },
+            'Х': { num: 600, meaning: "Шесть (избыток), умноженное на сто (полнота). Всемирный закон равновесия." },
+            'Ѱ': { num: 700, meaning: "Семь (дух), умноженное на сто (полнота). Полнота духа. Психея. Душа." },
+            'Ѡ': { num: 800, meaning: "Восемь (бесконечность), умноженное на сто (полнота). Полнота бесконечности." },
+            'Ц': { num: 900, meaning: "Девять (конец цикла), умноженное на сто (полнота). Завершение полноты. Предел предела." },
+            'Ѧ': { num: 900, meaning: "То же, что и Цы. Малый юс — новая форма завершения." },
+            'Ш': { num: 0, meaning: "Шум, хаос. Хаос не имеет числа. Он — пространство вне счёта." },
+            'Щ': { num: 0, meaning: "Шедрость, милость. Милость неизмерима. Она — дар без меры." },
+            'Ъ': { num: 0, meaning: "Твёрдый знак. Твердь. Это не число, а качество: несгибаемость." },
+            'Ы': { num: 0, meaning: "Соединение. Оно не имеет числа, потому что оно — функция." },
+            'Ь': { num: 0, meaning: "Мягкий знак. Мягкость, открытость. Число всегда твёрдо. Мягкость — вне счёта." },
+            'Ѣ': { num: 0, meaning: "Ять. Божественная взаимосвязь. Связь не имеет числа." },
+            'Ю': { num: 0, meaning: "Йотированный У. Фокус и глубина. Это процесс, а не число." },
+            'Я': { num: 0, meaning: "Азъ йотированный. Личность. Личность вне счёта. Она — сумма всех чисел." },
+            'Ѵ': { num: 400, meaning: "Ижица. Редчайший звук. Символ гармонии." }
+        };
+
+        function normalizeChar(char) {
+            const upper = char.toUpperCase();
+            const map = {
+                'Ё': 'Е', 'Э': 'Е', 'Й': 'И', 'У': 'Ѹ'
+            };
+            return map[upper] || upper;
+        }
+
+        function calculateFrequency(num) {
+            if (num === 0) return 110; 
+            let freq = num;
+            // Scale up only if the frequency is too low to be a pleasant tone (< 100 Hz)
+            while (freq < 100) {
+                freq *= 10;
+            }
+            // Do NOT scale down. Human hearing goes up to 20,000 Hz. 
+            // A sum of 1377 will correctly result in 1377 Hz.
+            return Math.round(freq);
+        }
+
+        function reduceToRoot(num) {
+            if (num === 0) return 0;
+            while (num > 9) {
+                num = String(num).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return num;
+        }
+
+        // --- Audio Setup ---
+        let resonanceSynth;
+        let reverbEffect;
+        let analyserNode;
+        let isAudioInitialized = false;
+        let isPlaying = false;
+        let animationFrameId;
+        let currentLoop = null;
+
+        async function initAudio() {
+            if (isAudioInitialized) return;
+            await Tone.start();
+            
+            reverbEffect = new Tone.Reverb({ decay: 6, wet: 0.5 }).toDestination();
+            
+            resonanceSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.5, decay: 1.5, sustain: 0.8, release: 3 }
+            }).connect(reverbEffect);
+            
+            resonanceSynth.volume.value = -6;
+            
+            analyserNode = new Tone.Analyser("waveform", 256);
+            resonanceSynth.connect(analyserNode);
+            
+            isAudioInitialized = true;
+        }
+
+        function updateAudioStatus(text, isActive) {
+            const statusEl = document.getElementById('audioStatus');
+            statusEl.innerHTML = `
+                <span class="w-2 h-2 ${isActive ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'} rounded-full"></span>
+                ${text}
+            `;
+        }
+
+        // --- Visualizer ---
+        const canvas = document.getElementById('visualizerCanvas');
+        const canvasCtx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+            canvasCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawVisualizer() {
+            animationFrameId = requestAnimationFrame(drawVisualizer);
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            canvasCtx.clearRect(0, 0, width, height);
+
+            if (!analyserNode) return;
+
+            const waveform = analyserNode.getValue();
+            const bufferLength = waveform.length;
+
+            canvasCtx.beginPath();
+            canvasCtx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+            canvasCtx.lineWidth = 2;
+            canvasCtx.shadowBlur = 10;
+            canvasCtx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+
+            const sliceWidth = width / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = waveform[i];
+                const y = (v * height / 2) + (height / 2);
+                if (i === 0) canvasCtx.moveTo(x, y);
+                else canvasCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+
+            canvasCtx.lineTo(width, height / 2);
+            canvasCtx.stroke();
+            canvasCtx.shadowBlur = 0;
+        }
+        drawVisualizer();
+
+        // --- Main Logic ---
+        const wordInput = document.getElementById('wordInput');
+        const resonateBtn = document.getElementById('resonateBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const letterGrid = document.getElementById('letterGrid');
+        const phraseInfo = document.getElementById('phraseInfo');
+        const sumCard = document.getElementById('sumCard');
+
+        function toggleResonance() {
+            if (isPlaying) {
+                stopResonance();
+            } else {
+                startResonance();
+            }
+        }
+
+        async function startResonance() {
+            const inputText = wordInput.value.trim();
+            if (!inputText) return;
+
+            await initAudio();
+
+            const chars = inputText.split('');
+            const processedChars = chars.map(c => normalizeChar(c));
+            
+            let totalSum = 0;
+            let validCount = 0;
+            const letterDataArray = [];
+
+            processedChars.forEach((char, idx) => {
+                if (char === ' ') {
+                    letterDataArray.push({ char: ' ', num: 0, freq: 0, meaning: "Пауза. Тишина (Ша).", isSpace: true, index: idx });
+                    return;
+                }
+
+                const data = bukvitsaData[char];
+                if (data) {
+                    totalSum += data.num;
+                    if (data.num > 0) validCount++;
+                    letterDataArray.push({
+                        char: char,
+                        num: data.num,
+                        freq: calculateFrequency(data.num),
+                        meaning: data.meaning,
+                        isSpace: false,
+                        index: idx
+                    });
+                }
+            });
+
+            const rootSum = reduceToRoot(totalSum);
+            const mode = document.querySelector('input[name="playMode"]:checked').value;
+
+            document.getElementById('totalSum').textContent = totalSum === 0 ? "Вне счёта" : totalSum;
+            document.getElementById('rootSum').textContent = rootSum === 0 ? "—" : rootSum;
+            document.getElementById('letterCount').textContent = validCount;
+            
+            const insights = {
+                1: "Единица — импульс, начало, точка взрыва. Сила инициации и абсолютной целостности.",
+                2: "Двойка — дуальность, выбор, разделение. Взаимодействие двух начал и поиск баланса.",
+                3: "Тройка — творчество, выражение, рост. Энергия созидания и передачи импульса.",
+                4: "Четверка — структура, стабильность, основа. Прочность, порядок и фундаментальность.",
+                5: "Пятерка — жизнь, чувства, человек в центре мира. Динамика, наполненная бытием.",
+                6: "Шестерка — гармония и избыток силы. Выход за пределы нормы, мощная трансформация.",
+                7: "Семерка — полнота духа в материи, завершённый цикл. Понимание скрытых законов.",
+                8: "Восьмерка — бесконечность, связь неба и земли. Потенциал вертикального роста.",
+                9: "Девятка — завершение, тайна, готовность стать началом. Опыт всех предыдущих чисел."
+            };
+            
+            document.getElementById('insightText').textContent = totalSum === 0 
+                ? "Это слово или фраза находится вне числового измерения. Это чистый процесс, потенциал или личность, не подлежащая сведению к цифре." 
+                : (insights[rootSum] || "Сложная вибрация, требующая глубокого резонансного анализа.");
+
+            const isPhrase = inputText.includes(' ');
+            phraseInfo.classList.toggle('hidden', !isPhrase);
+
+            letterGrid.innerHTML = '';
+            letterDataArray.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = `letter-card glass-panel-dark rounded-xl p-4 text-center ${item.num === 0 ? 'zero-value' : ''}`;
+                card.id = `letter-card-${item.index}`;
+                card.style.animationDelay = `${item.index * 0.05}s`;
+                
+                if (item.isSpace) {
+                    card.innerHTML = `<div class="text-slate-600 text-2xl">␣</div><div class="text-xs text-slate-500 mt-2">Пауза</div>`;
+                } else {
+                    card.innerHTML = `
+                        <div class="text-3xl font-bold ${item.num === 0 ? 'text-slate-400' : 'text-amber-400'} mb-1">${item.char}</div>
+                        <div class="text-xs text-slate-400 mb-2">Число: <span class="text-white font-semibold">${item.num === 0 ? 'Вне счёта' : item.num}</span></div>
+                        <div class="text-xs ${item.freq === 0 ? 'text-slate-600' : 'text-amber-400/70'} freq-badge mb-2">${item.freq === 0 ? 'Тишина' : item.freq + ' Гц'}</div>
+                        <div class="text-xs text-slate-500 leading-tight border-t border-slate-700 pt-2 mt-2">${item.meaning}</div>
+                    `;
+                }
+                letterGrid.appendChild(card);
+            });
+
+            resultsSection.classList.remove('hidden');
+
+            // --- AUDIO PLAYBACK LOGIC ---
+            const activeNotes = letterDataArray.filter(item => item.freq > 0);
+
+            if (activeNotes.length === 0 && totalSum === 0) {
+                alert("В данном слове нет числовых вибраций для резонанса.");
+                return;
+            }
+
+            Tone.Transport.stop();
+            Tone.Transport.cancel();
+            
+            document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('playing'));
+            sumCard.classList.remove('active-mode');
+
+            if (mode === '1') {
+                // Mode 1: Total Frequency Drone (Exact sum, e.g., 1377 Hz)
+                const freq = calculateFrequency(totalSum);
+                resonanceSynth.triggerAttack(freq);
+                sumCard.classList.add('active-mode');
+                updateAudioStatus(`Непрерывный резонанс: ${freq} Гц (Полная сумма)`, true);
+                
+            } else if (mode === '2') {
+                // Mode 2: Sequence
+                Tone.Transport.bpm.value = 60;
+                let currentIndex = 0;
+                currentLoop = new Tone.Loop((time) => {
+                    const note = activeNotes[currentIndex];
+                    resonanceSynth.triggerAttackRelease(note.freq, "1n", time);
+                    Tone.Draw.schedule(() => {
+                        document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('playing'));
+                        const card = document.getElementById(`letter-card-${note.index}`);
+                        if (card) card.classList.add('playing');
+                    }, time);
+                    currentIndex = (currentIndex + 1) % activeNotes.length;
+                }, "1n").start(0);
+                Tone.Transport.start();
+                updateAudioStatus("Последовательный резонанс активен", true);
+                
+            } else if (mode === '3') {
+                // Mode 3: Chord
+                const freqs = activeNotes.map(n => n.freq);
+                resonanceSynth.triggerAttack(freqs);
+                
+                activeNotes.forEach(note => {
+                    const card = document.getElementById(`letter-card-${note.index}`);
+                    if (card) card.classList.add('playing');
+                });
+                
+                updateAudioStatus(`Аккордный резонанс: ${freqs.length} частот`, true);
+            }
+
+            isPlaying = true;
+            resonateBtn.textContent = "Остановить Резонанс";
+            resonateBtn.classList.remove("btn-resonate");
+            resonateBtn.classList.add("btn-stop", "text-white");
+        }
+
+        function stopResonance() {
+            if (currentLoop) {
+                currentLoop.stop();
+                currentLoop.dispose();
+                currentLoop = null;
+            }
+            
+            Tone.Transport.stop();
+            Tone.Transport.cancel();
+            
+            if (resonanceSynth) {
+                resonanceSynth.releaseAll();
+            }
+            
+            isPlaying = false;
+
+            resonateBtn.textContent = "Рассчитать и Резонировать";
+            resonateBtn.classList.add("btn-resonate");
+            resonateBtn.classList.remove("btn-stop", "text-white");
+            updateAudioStatus("Резонанс остановлен", false);
+            
+            document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('playing'));
+            sumCard.classList.remove('active-mode');
+        }
+
+        // Event Listeners
+        resonateBtn.addEventListener('click', toggleResonance);
+        wordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') toggleResonance();
+        });
+        
+        // Stop audio if mode changes while playing
+        document.querySelectorAll('input[name="playMode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (isPlaying) {
+                    stopResonance();
+                    startResonance();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+```
