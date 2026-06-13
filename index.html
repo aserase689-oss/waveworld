@@ -1,10 +1,10 @@
-﻿```html
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>РЕЗОНАНС СЛОВА — Матрица Частот</title>
+    <title>РЕЗОНАНС СЛОВА — Матрица Смысла 7×7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.15/cyrillic.css">
@@ -82,11 +82,6 @@
             background: rgba(148, 163, 184, 0.05);
         }
 
-        .letter-card.zero-value.playing {
-            border-color: #94a3b8;
-            box-shadow: 0 0 20px rgba(148, 163, 184, 0.4);
-        }
-
         .sum-display {
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.05));
             border: 1px solid rgba(251, 191, 36, 0.3);
@@ -144,6 +139,31 @@
             border-color: #fbbf24;
         }
 
+        .timeline-item {
+            position: relative;
+            padding-left: 24px;
+            border-left: 2px solid rgba(251, 191, 36, 0.3);
+            margin-left: 12px;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item:last-child {
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fbbf24;
+            border: 2px solid #020617;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -176,12 +196,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-amber-400 tracking-wider">РЕЗОНАНС СЛОВА</h1>
-                    <p class="text-xs text-slate-400 hidden md:block">Матрица числовых и звуковых частот</p>
+                    <p class="text-xs text-slate-400 hidden md:block">Матрица смысла 7×7 и вибрационных частот</p>
                 </div>
             </div>
             <div class="text-right">
                 <div class="text-xs text-amber-400/70 uppercase tracking-widest">Система Вани</div>
-                <div class="text-xs text-slate-500">Азбука • Числа • Частоты</div>
+                <div class="text-xs text-slate-500">Объём смысла, а не плоскость передачи</div>
             </div>
         </div>
     </header>
@@ -191,18 +211,18 @@
         
         <!-- Input Section -->
         <div class="glass-panel rounded-2xl p-6 md:p-8 mb-8">
-            <h2 class="text-lg font-semibold text-amber-400 mb-4">Введите слово или фразу</h2>
+            <h2 class="text-lg font-semibold text-amber-400 mb-4">Введите слово или фразу для разбора</h2>
             <div class="flex flex-col md:flex-row gap-4 mb-6">
                 <input type="text" id="wordInput" placeholder="Например: Любовь, Сознание, Я есмь..." 
                        class="flex-grow bg-slate-800/50 border border-slate-600 rounded-xl px-6 py-4 text-xl text-white focus:outline-none focus:border-amber-400 transition-colors placeholder-slate-500">
                 <button id="resonateBtn" class="btn-resonate text-slate-900 font-bold py-4 px-8 rounded-xl text-lg whitespace-nowrap">
-                    Рассчитать и Резонировать
+                    Разобрать и Резонировать
                 </button>
             </div>
             
             <!-- Playback Mode Selection -->
             <div>
-                <label class="block text-sm font-semibold text-amber-400 mb-3">Режим воспроизведения:</label>
+                <label class="block text-sm font-semibold text-amber-400 mb-3">Режим звукового резонанса:</label>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <label class="cursor-pointer group">
                         <input type="radio" name="playMode" value="1" class="mode-radio sr-only" checked>
@@ -211,7 +231,7 @@
                                 <div class="radio-dot w-4 h-4 rounded-full border-2 border-slate-500 transition-colors"></div>
                                 <span class="font-semibold text-slate-200">1. Полная частота</span>
                             </div>
-                            <p class="text-xs text-slate-400 leading-relaxed">Непрерывный дрон на точной частоте полной суммы числа слова (например, 1377 Гц). Олицетворяет целостность.</p>
+                            <p class="text-xs text-slate-400 leading-relaxed">Непрерывный дрон на точной частоте полной суммы числа слова. Олицетворяет целостность.</p>
                         </div>
                     </label>
                     <label class="cursor-pointer group">
@@ -275,32 +295,55 @@
             <div class="divider-gold mb-8"></div>
 
             <!-- Letter Breakdown -->
-            <h3 class="text-lg font-semibold text-amber-400 mb-4">Матрица Слова</h3>
-            <div id="letterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            <h3 class="text-lg font-semibold text-amber-400 mb-4">Матрица Слова (Числа и Частоты)</h3>
+            <div id="letterGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
                 <!-- Letter cards injected here -->
             </div>
 
-            <!-- Phrase Melody Info -->
-            <div id="phraseInfo" class="hidden glass-panel-dark rounded-xl p-5 border-l-4 border-blue-400 mb-8">
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                    </svg>
-                    <div>
-                        <h4 class="text-blue-400 font-semibold mb-2">Структура Фразы</h4>
-                        <p class="text-slate-300 leading-relaxed text-sm">Фраза содержит пробелы, создающие паузы (Ша). В режиме последовательности это создает ритмический рисунок. В режиме аккорда или полной частоты паузы пропускаются, оставляя только чистый резонанс смысловых граней.</p>
+            <div class="divider-gold mb-8"></div>
+
+            <!-- NEW: Meaning Assembly Section -->
+            <div id="meaningAssemblySection" class="mb-10">
+                <h3 class="text-lg font-semibold text-amber-400 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                    Сборка Смысла (Матрица 7×7)
+                </h3>
+                
+                <div class="grid lg:grid-cols-5 gap-6">
+                    <!-- Timeline of Letters -->
+                    <div class="lg:col-span-2 glass-panel-dark rounded-xl p-6">
+                        <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Порядок узлов (букв)</h4>
+                        <div id="meaningTimeline" class="space-y-2">
+                            <!-- Timeline items injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Assembled Meaning Volume -->
+                    <div class="lg:col-span-3 glass-panel rounded-xl p-6 border-l-4 border-amber-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg class="w-32 h-32 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-amber-400 mb-4">Собранный Смысл (Объём)</h4>
+                        <div id="assembledMeaningText" class="text-slate-200 leading-relaxed text-lg whitespace-pre-line relative z-10">
+                            <!-- Assembled text injected here -->
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-amber-400/20">
+                            <p class="text-xs text-amber-400/60 italic">
+                                «Слова служат не для общения, а для передачи смысла. Для общения служит смысл, вложенный в слово порядком букв. Не подменяй объём плоскостью.»
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Fractal Insight -->
-            <div class="glass-panel-dark rounded-xl p-6 border-l-4 border-amber-400">
+            <div class="glass-panel-dark rounded-xl p-6 border-l-4 border-blue-400">
                 <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
                     <div>
-                        <h4 class="text-amber-400 font-semibold mb-2">Резонансный Инсайт</h4>
+                        <h4 class="text-blue-400 font-semibold mb-2">Резонансный Инсайт</h4>
                         <p id="insightText" class="text-slate-300 leading-relaxed italic">Введите слово, чтобы получить инсайт.</p>
                     </div>
                 </div>
@@ -316,71 +359,83 @@
     </footer>
 
     <script>
-        // --- Data: Exact Bukvitsa Numerology & Meanings ---
-        const bukvitsaData = {
-            'А': { num: 1, meaning: "Точка. Исток. Абсолютная недифференцированная целостность. «Я есмь»." },
-            'Б': { num: 0, meaning: "Потенциал, который ещё не стал числом. Семя, готовое раскрыться." },
-            'В': { num: 2, meaning: "Двойственность. Первое разделение единицы. Мудрость, которая видит оба полюса." },
-            'Г': { num: 3, meaning: "Троица. Действие, передача. Импульс, который связывает начало и конец." },
-            'Д': { num: 4, meaning: "Материя. Четыре стороны света. Устойчивость, основание, дом." },
-            'Е': { num: 5, meaning: "Жизнь. Пять чувств. Человек, стоящий в центре мира. Бытие." },
-            'Ж': { num: 0, meaning: "Жизнь. Жизнь нельзя измерить числом. Она — сам процесс." },
-            'З': { num: 7, meaning: "Полнота духа в материи. Завершённый цикл. Семь дней творения." },
-            'Ѕ': { num: 6, meaning: "Шесть — гармония, но также и «зѣло». Избыток силы, выход за пределы нормы." },
-            'И': { num: 8, meaning: "Бесконечность. Связь неба и земли. Вертикаль, пронзающая миры." },
-            'І': { num: 10, meaning: "Совершенство. Десять заповедей. Возвращение к единице на новом уровне." },
-            'Ѳ': { num: 9, meaning: "Тайна. Девять месяцев рождения. Конец цикла, готовый стать началом." },
-            'К': { num: 20, meaning: "Два (выбор), умноженное на десять (мир). Выбор в полноте мира." },
-            'Л': { num: 30, meaning: "Три (троица), умноженное на десять (мир). Община, структура, готовая служить." },
-            'М': { num: 40, meaning: "Четыре (материя), умноженное на десять (мир). Мысль, облечённая в плоть." },
-            'Н': { num: 50, meaning: "Пять (человек), умноженное на десять (мир). Мост между «я» и «мы»." },
-            'Ѯ': { num: 60, meaning: "Шесть (избыток), умноженное на десять (мир). Сложность, требующая распутывания." },
-            'О': { num: 70, meaning: "Семь (дух), умноженное на десять (мир). Идея, ставшая материей." },
-            'П': { num: 80, meaning: "Восемь (бесконечность), умноженное на десять (мир). Покой и гармония." },
-            'Ч': { num: 90, meaning: "Девять (конец цикла), умноженное на десять (мир). Глубина, ведущая к завершению." },
-            'Р': { num: 100, meaning: "Сто — полнота энергии. Река, сила, мощь. Гром." },
-            'С': { num: 200, meaning: "Двойная полнота (2 × 100). Потенциал. Семя, готовое прорасти." },
-            'Т': { num: 300, meaning: "Тройная полнота (3 × 100). Закон. Крест. Абсолютная структура." },
-            'Ѹ': { num: 400, meaning: "Четыре (материя), умноженное на сто (полнота). Полнота материи. Плоть." },
-            'Ф': { num: 500, meaning: "Пять (жизнь), умноженное на сто (полнота). Огонь жизни. Гордость, добродетель." },
-            'Х': { num: 600, meaning: "Шесть (избыток), умноженное на сто (полнота). Всемирный закон равновесия." },
-            'Ѱ': { num: 700, meaning: "Семь (дух), умноженное на сто (полнота). Полнота духа. Психея. Душа." },
-            'Ѡ': { num: 800, meaning: "Восемь (бесконечность), умноженное на сто (полнота). Полнота бесконечности." },
-            'Ц': { num: 900, meaning: "Девять (конец цикла), умноженное на сто (полнота). Завершение полноты. Предел предела." },
-            'Ѧ': { num: 900, meaning: "То же, что и Цы. Малый юс — новая форма завершения." },
-            'Ш': { num: 0, meaning: "Шум, хаос. Хаос не имеет числа. Он — пространство вне счёта." },
-            'Щ': { num: 0, meaning: "Шедрость, милость. Милость неизмерима. Она — дар без меры." },
-            'Ъ': { num: 0, meaning: "Твёрдый знак. Твердь. Это не число, а качество: несгибаемость." },
-            'Ы': { num: 0, meaning: "Соединение. Оно не имеет числа, потому что оно — функция." },
-            'Ь': { num: 0, meaning: "Мягкий знак. Мягкость, открытость. Число всегда твёрдо. Мягкость — вне счёта." },
-            'Ѣ': { num: 0, meaning: "Ять. Божественная взаимосвязь. Связь не имеет числа." },
-            'Ю': { num: 0, meaning: "Йотированный У. Фокус и глубина. Это процесс, а не число." },
-            'Я': { num: 0, meaning: "Азъ йотированный. Личность. Личность вне счёта. Она — сумма всех чисел." },
-            'Ѵ': { num: 400, meaning: "Ижица. Редчайший звук. Символ гармонии." }
+        // --- Data: 7x7 Matrix of Meanings (Consciousness) ---
+        const matrix7x7 = {
+            'А': { level: 1, tact: 1, levelName: "Небо (исток)", tactName: "Исток", name: "Аzъ", num: 1, meaning: "бог живущий и сотворяющий на земле, начало, исток, я, сознание", sound: "а" },
+            'Б': { level: 1, tact: 2, levelName: "Небо (исток)", tactName: "Развёртка", name: "Боги", num: null, meaning: "множество богов, божественное, превосходящее", sound: "б" },
+            'В': { level: 1, tact: 3, levelName: "Небо (исток)", tactName: "Оформление", name: "Вѣди", num: 2, meaning: "мудрость на Земле и Небесах, ведаю, полнота знаний", sound: "в" },
+            'Г': { level: 1, tact: 4, levelName: "Небо (исток)", tactName: "Настоящее", name: "Глаголи", num: 3, meaning: "передача мудрости, движение, поток, истечение, направление", sound: "г" },
+            'Д': { level: 1, tact: 5, levelName: "Небо (исток)", tactName: "Направление", name: "Добро", num: 4, meaning: "развитие, достаток, накопление опыта, полнота, преуспевание", sound: "д" },
+            'Е': { level: 1, tact: 6, levelName: "Небо (исток)", tactName: "Развёртка будущего", name: "Есть", num: 5, meaning: "пять элементов жизни, форма жизни, бытие", sound: "е" },
+            'Э': { level: 1, tact: 7, levelName: "Небо (исток)", tactName: "Предел", name: "Есмь", num: null, meaning: "связка, определение, разнообразие, многомерность бытия", sound: "йе" },
+            
+            'Ж': { level: 2, tact: 1, levelName: "Небо (сознание)", tactName: "Исток", name: "Животъ", num: null, meaning: "жизнь многогранная, зарождение, эволюция, рост, преобразование", sound: "ж" },
+            'Ѕ': { level: 2, tact: 2, levelName: "Небо (сознание)", tactName: "Развёртка", name: "Ѕѣло", num: 6, meaning: "неизведанное, сверх, очень, весьма, не познанное нами, нечто сверх меры", sound: "дз" },
+            'З': { level: 2, tact: 3, levelName: "Небо (сознание)", tactName: "Оформление", name: "Zемля", num: 7, meaning: "земля как небесное тело, основа, почва, форма жизни (материальный аспект)", sound: "з" },
+            'И': { level: 2, tact: 4, levelName: "Небо (сознание)", tactName: "Настоящее", name: "Иже", num: 8, meaning: "соединение, единство, равновесие, истина бытийная", sound: "и (долгая)" },
+            'І': { level: 2, tact: 5, levelName: "Небо (сознание)", tactName: "Направление", name: "Іжеи", num: 10, meaning: "истина вселенская, связь с космосом, уравнивает", sound: "и (ровное)" },
+            'Й': { level: 2, tact: 6, levelName: "Небо (сознание)", tactName: "Развёртка будущего", name: "Їнить", num: null, meaning: "община, коллективный разум, истина общинная", sound: "и (полукраткая)" },
+            'Ћ': { level: 2, tact: 7, levelName: "Небо (сознание)", tactName: "Предел", name: "Гервь", num: null, meaning: "прекрасное, необычное, душевное, стремление к возвышенному", sound: "гэ, ха" },
+
+            'К': { level: 3, tact: 1, levelName: "Соединительная форма (верх)", tactName: "Исток", name: "Како", num: 20, meaning: "объединение человека со Вселенной, масштаб", sound: "к" },
+            'Л': { level: 3, tact: 2, levelName: "Соединительная форма (верх)", tactName: "Развёртка", name: "ЛюдЇе", num: 30, meaning: "объединение мирно мыслящих, соприкосновение объёмов", sound: "л" },
+            'М': { level: 3, tact: 3, levelName: "Соединительная форма (верх)", tactName: "Оформление", name: "Мыслитѣ", num: 40, meaning: "мышление, движение ума", sound: "м" },
+            'Н': { level: 3, tact: 4, levelName: "Соединительная форма (верх)", tactName: "Настоящее", name: "Нашъ", num: 50, meaning: "то, что было известно предкам, наследие", sound: "н" },
+            'О': { level: 3, tact: 5, levelName: "Соединительная форма (верх)", tactName: "Направление", name: "Онъ", num: 70, meaning: "самостоятельная форма, структура", sound: "о" },
+            'П': { level: 3, tact: 6, levelName: "Соединительная форма (верх)", tactName: "Развёртка будущего", name: "Покои", num: 80, meaning: "покой, бездействие, подвешенное состояние", sound: "п" },
+            'Р': { level: 3, tact: 7, levelName: "Соединительная форма (верх)", tactName: "Предел", name: "Рѣци", num: 100, meaning: "речь, течение, сила энергии", sound: "р" },
+
+            'С': { level: 4, tact: 1, levelName: "Соединительная форма (центр)", tactName: "Исток", name: "Слово", num: 200, meaning: "мысль произнесённая, соединительная форма", sound: "с" },
+            'Т': { level: 4, tact: 2, levelName: "Соединительная форма (центр)", tactName: "Развёртка", name: "Твѣрдо", num: 300, meaning: "утверждённое свыше, опора, фундамент", sound: "т" },
+            'У': { level: 4, tact: 3, levelName: "Соединительная форма (центр)", tactName: "Оформление", name: "Укъ", num: 400, meaning: "зов свыше, послание, взаимодействие", sound: "у" },
+            'Ѹ': { level: 4, tact: 4, levelName: "Соединительная форма (центр)", tactName: "Настоящее", name: "Оукъ", num: null, meaning: "чувственность, познание через чувства", sound: "у" },
+            'Ф': { level: 4, tact: 5, levelName: "Соединительная форма (центр)", tactName: "Направление", name: "ФѢртъ", num: 500, meaning: "гордость, благородство, значимость, добродетель", sound: "ф" },
+            'Х': { level: 4, tact: 6, levelName: "Соединительная форма (центр)", tactName: "Развёртка будущего", name: "Хѣръ", num: 600, meaning: "мировое равновесие, гармония целого", sound: "х" },
+            'Ѿ': { level: 4, tact: 7, levelName: "Соединительная форма (центр)", tactName: "Предел", name: "Отъ", num: 800, meaning: "предел, за которым начинается новое", sound: "от" },
+
+            'Ц': { level: 5, tact: 1, levelName: "Соединительная форма (низ)", tactName: "Исток", name: "Ци", num: 900, meaning: "цель, высшая структура пути", sound: "ц" },
+            'Ч': { level: 5, tact: 2, levelName: "Соединительная форма (низ)", tactName: "Развёртка", name: "Червль", num: 90, meaning: "грань, рубеж, переход", sound: "ч" },
+            'Ш': { level: 5, tact: 3, levelName: "Соединительная форма (низ)", tactName: "Оформление", name: "Ша", num: null, meaning: "тишина, простор, тихий покой", sound: "ш" },
+            'Щ': { level: 5, tact: 4, levelName: "Соединительная форма (низ)", tactName: "Настоящее", name: "Шта", num: null, meaning: "плотность, разнообразие, защитная форма", sound: "щ" },
+            'Ъ': { level: 5, tact: 5, levelName: "Соединительная форма (низ)", tactName: "Направление", name: "Еръ", num: null, meaning: "твердость, сотворение в процессе действия", sound: "ъ" },
+            'Ы': { level: 5, tact: 6, levelName: "Соединительная форма (низ)", tactName: "Развёртка будущего", name: "Еры", num: null, meaning: "единство, соприкосновение множества", sound: "ы" },
+            'Ь': { level: 5, tact: 7, levelName: "Соединительная форма (низ)", tactName: "Предел", name: "Ерь", num: null, meaning: "законченное творение, завершённость", sound: "ь" },
+
+            'Я': { level: 6, tact: 1, levelName: "Земля (тело)", tactName: "Исток", name: "Ять", num: null, meaning: "божественная связь, взаимосвязь небес и земли", sound: "я" },
+            'Ю': { level: 6, tact: 2, levelName: "Земля (тело)", tactName: "Развёртка", name: "Юнь", num: null, meaning: "соприкосновение, взаимосвязь по касательной", sound: "ю" },
+            'IA': { level: 6, tact: 3, levelName: "Земля (тело)", tactName: "Оформление", name: "Арь", num: null, meaning: "однородная структура, единство происхождения", sound: "я" },
+            'Ѥ': { level: 6, tact: 4, levelName: "Земля (тело)", tactName: "Настоящее", name: "Эдо", num: null, meaning: "прикосновение к целому, познание через соприкосновение, замысел", sound: "э" },
+            'Ѡ': { level: 6, tact: 5, levelName: "Земля (тело)", tactName: "Направление", name: "Омъ", num: null, meaning: "сияние, созидание, творческий импульс", sound: "о" },
+            'Ѧ': { level: 6, tact: 6, levelName: "Земля (тело)", tactName: "Развёртка будущего", name: "Енъ", num: null, meaning: "образ, восходящая структура", sound: "я" },
+            'Ѫ': { level: 6, tact: 7, levelName: "Земля (тело)", tactName: "Предел", name: "Одь", num: null, meaning: "наследие, богатство предков", sound: "о" },
+
+            'Ё': { level: 7, tact: 1, levelName: "Земля (основание)", tactName: "Исток", name: "Ёта", num: null, meaning: "познание, указывающая форма", sound: "ё" },
+            'Ѭ': { level: 7, tact: 2, levelName: "Земля (основание)", tactName: "Развёртка", name: "Ота", num: null, meaning: "отторжение чуждого, приобщение к наследию", sound: "ю" },
+            'Ѯ': { level: 7, tact: 3, levelName: "Земля (основание)", tactName: "Оформление", name: "Кси", num: 60, meaning: "дух, духовность (форма современной буквы 'З' в духовном контексте)", sound: "кс" },
+            'Ѱ': { level: 7, tact: 4, levelName: "Земля (основание)", tactName: "Настоящее", name: "Пси", num: 700, meaning: "душа, эмоциональный план", sound: "пс" },
+            'Ѳ': { level: 7, tact: 5, levelName: "Земля (основание)", tactName: "Направление", name: "Фита", num: 9, meaning: "единство духа, природа, слияние человеческого и природного", sound: "ф" },
+            'Ѵ': { level: 7, tact: 6, levelName: "Земля (основание)", tactName: "Развёртка будущего", name: "Ижица", num: null, meaning: "движение, гармоничное состояние", sound: "и" },
+            'Ӕ': { level: 7, tact: 7, levelName: "Земля (основание)", tactName: "Предел", name: "Ижа", num: null, meaning: "мера времени, мгновение, переход", sound: "э" }
         };
 
         function normalizeChar(char) {
             const upper = char.toUpperCase();
             const map = {
-                'Ё': 'Е', 'Э': 'Е', 'Й': 'И', 'У': 'Ѹ'
+                'Ё': 'Ё', 'Э': 'Э', 'Й': 'Й', 'Я': 'Я', 'Ю': 'Ю'
             };
             return map[upper] || upper;
         }
 
         function calculateFrequency(num) {
-            if (num === 0) return 110; 
+            if (num === 0 || num === null) return 110; 
             let freq = num;
-            // Scale up only if the frequency is too low to be a pleasant tone (< 100 Hz)
-            while (freq < 100) {
-                freq *= 10;
-            }
+            while (freq < 100) freq *= 10;
             // Do NOT scale down. Human hearing goes up to 20,000 Hz. 
-            // A sum of 1377 will correctly result in 1377 Hz.
             return Math.round(freq);
         }
 
         function reduceToRoot(num) {
-            if (num === 0) return 0;
+            if (num === 0 || num === null) return 0;
             while (num > 9) {
                 num = String(num).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
             }
@@ -474,8 +529,9 @@
         const resonateBtn = document.getElementById('resonateBtn');
         const resultsSection = document.getElementById('resultsSection');
         const letterGrid = document.getElementById('letterGrid');
-        const phraseInfo = document.getElementById('phraseInfo');
         const sumCard = document.getElementById('sumCard');
+        const meaningTimeline = document.getElementById('meaningTimeline');
+        const assembledMeaningText = document.getElementById('assembledMeaningText');
 
         function toggleResonance() {
             if (isPlaying) {
@@ -483,6 +539,43 @@
             } else {
                 startResonance();
             }
+        }
+
+        function assembleMeaning(letterDataArray) {
+            if (letterDataArray.filter(x => !x.isSpace && x.matrixData).length === 0) {
+                return "Смысл не может быть собран из пустоты. В данном слове отсутствуют узлы матрицы.";
+            }
+
+            let narrative = [];
+            let coreThemes = [];
+
+            letterDataArray.forEach((item, index) => {
+                if (item.isSpace) {
+                    narrative.push("...пространство тишины (Ша), разделяющее потоки...");
+                    return;
+                }
+                if (!item.matrixData) return;
+
+                const m = item.matrixData;
+                const isFirst = index === 0;
+                const isLast = index === letterDataArray.length - 1;
+
+                let sentence = "";
+                if (isFirst) {
+                    sentence = `Начало слова несет букву «${item.char}» (${m.name}), что есть ${m.meaning}. Это исток замысла на уровне «${m.levelName}», в такте «${m.tactName}». `;
+                } else if (isLast) {
+                    sentence = `Завершает структуру буква «${item.char}» (${m.name}), вносящая ${m.meaning}. Это придает слову форму на уровне «${m.levelName}», завершая такт «${m.tactName}». `;
+                } else {
+                    sentence = `Далее следует «${item.char}» (${m.name}) — ${m.meaning}, проявляясь на уровне «${m.levelName}» в такте «${m.tactName}». `;
+                }
+                narrative.push(sentence);
+                coreThemes.push(m.meaning.split(',')[0].trim());
+            });
+
+            const uniqueThemes = coreThemes.filter((v, i, a) => a.indexOf(v) === i);
+            const synthesis = `\n\nСОБРАННЫЙ СМЫСЛ (ОБЪЁМ):\nСлово представляет собой целостный поток, начинающийся с ${uniqueThemes[0] || 'истока'} и проходящий через ${uniqueThemes.slice(1).join(", ")}. Порядок букв выстраивает не плоское описание, а объёмную структуру сознания, где каждая грань (${letterDataArray.filter(x=>!x.isSpace).length} активных узлов) резонирует с конкретной глубиной бытия и тактом времени, создавая уникальный вибрационный код, передающий суть, а не просто обозначающий её.`;
+
+            return narrative.join("") + synthesis;
         }
 
         async function startResonance() {
@@ -500,21 +593,24 @@
 
             processedChars.forEach((char, idx) => {
                 if (char === ' ') {
-                    letterDataArray.push({ char: ' ', num: 0, freq: 0, meaning: "Пауза. Тишина (Ша).", isSpace: true, index: idx });
+                    letterDataArray.push({ char: ' ', num: 0, freq: 0, meaning: "Пауза. Тишина (Ша).", isSpace: true, index: idx, matrixData: null });
                     return;
                 }
 
-                const data = bukvitsaData[char];
+                const data = matrix7x7[char];
                 if (data) {
-                    totalSum += data.num;
-                    if (data.num > 0) validCount++;
+                    if (data.num) {
+                        totalSum += data.num;
+                        validCount++;
+                    }
                     letterDataArray.push({
                         char: char,
-                        num: data.num,
+                        num: data.num || 0,
                         freq: calculateFrequency(data.num),
                         meaning: data.meaning,
                         isSpace: false,
-                        index: idx
+                        index: idx,
+                        matrixData: data
                     });
                 }
             });
@@ -542,11 +638,11 @@
                 ? "Это слово или фраза находится вне числового измерения. Это чистый процесс, потенциал или личность, не подлежащая сведению к цифре." 
                 : (insights[rootSum] || "Сложная вибрация, требующая глубокого резонансного анализа.");
 
-            const isPhrase = inputText.includes(' ');
-            phraseInfo.classList.toggle('hidden', !isPhrase);
-
             letterGrid.innerHTML = '';
+            meaningTimeline.innerHTML = '';
+            
             letterDataArray.forEach((item) => {
+                // Grid Card
                 const card = document.createElement('div');
                 card.className = `letter-card glass-panel-dark rounded-xl p-4 text-center ${item.num === 0 ? 'zero-value' : ''}`;
                 card.id = `letter-card-${item.index}`;
@@ -559,11 +655,34 @@
                         <div class="text-3xl font-bold ${item.num === 0 ? 'text-slate-400' : 'text-amber-400'} mb-1">${item.char}</div>
                         <div class="text-xs text-slate-400 mb-2">Число: <span class="text-white font-semibold">${item.num === 0 ? 'Вне счёта' : item.num}</span></div>
                         <div class="text-xs ${item.freq === 0 ? 'text-slate-600' : 'text-amber-400/70'} freq-badge mb-2">${item.freq === 0 ? 'Тишина' : item.freq + ' Гц'}</div>
-                        <div class="text-xs text-slate-500 leading-tight border-t border-slate-700 pt-2 mt-2">${item.meaning}</div>
                     `;
                 }
                 letterGrid.appendChild(card);
+
+                // Timeline Item
+                if (!item.isSpace && item.matrixData) {
+                    const m = item.matrixData;
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    timelineItem.innerHTML = `
+                        <div class="flex items-baseline gap-2 mb-1">
+                            <span class="text-xl font-bold text-amber-400">${item.char}</span>
+                            <span class="text-xs text-slate-400 uppercase tracking-wider">${m.name}</span>
+                        </div>
+                        <div class="text-xs text-slate-300 mb-1"><span class="text-amber-400/70">Уровень:</span> ${m.levelName} (${m.level}) | <span class="text-amber-400/70">Такт:</span> ${m.tactName} (${m.tact})</div>
+                        <div class="text-sm text-slate-200 leading-snug">${m.meaning}</div>
+                    `;
+                    meaningTimeline.appendChild(timelineItem);
+                } else if (item.isSpace) {
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    timelineItem.innerHTML = `<div class="text-sm text-slate-500 italic">Пауза (Ша) — пространство между потоками</div>`;
+                    meaningTimeline.appendChild(timelineItem);
+                }
             });
+
+            // Assemble Meaning
+            assembledMeaningText.textContent = assembleMeaning(letterDataArray);
 
             resultsSection.classList.remove('hidden');
 
@@ -582,14 +701,12 @@
             sumCard.classList.remove('active-mode');
 
             if (mode === '1') {
-                // Mode 1: Total Frequency Drone (Exact sum, e.g., 1377 Hz)
                 const freq = calculateFrequency(totalSum);
                 resonanceSynth.triggerAttack(freq);
                 sumCard.classList.add('active-mode');
                 updateAudioStatus(`Непрерывный резонанс: ${freq} Гц (Полная сумма)`, true);
                 
             } else if (mode === '2') {
-                // Mode 2: Sequence
                 Tone.Transport.bpm.value = 60;
                 let currentIndex = 0;
                 currentLoop = new Tone.Loop((time) => {
@@ -606,7 +723,6 @@
                 updateAudioStatus("Последовательный резонанс активен", true);
                 
             } else if (mode === '3') {
-                // Mode 3: Chord
                 const freqs = activeNotes.map(n => n.freq);
                 resonanceSynth.triggerAttack(freqs);
                 
@@ -640,7 +756,7 @@
             
             isPlaying = false;
 
-            resonateBtn.textContent = "Рассчитать и Резонировать";
+            resonateBtn.textContent = "Разобрать и Резонировать";
             resonateBtn.classList.add("btn-resonate");
             resonateBtn.classList.remove("btn-stop", "text-white");
             updateAudioStatus("Резонанс остановлен", false);
@@ -655,7 +771,6 @@
             if (e.key === 'Enter') toggleResonance();
         });
         
-        // Stop audio if mode changes while playing
         document.querySelectorAll('input[name="playMode"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 if (isPlaying) {
